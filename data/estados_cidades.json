@@ -1,0 +1,137 @@
+[
+  {
+    "estado": "Acre",
+    "uf": "AC",
+    "cidades": []
+  },
+  {
+    "estado": "Alagoas",
+    "uf": "AL",
+    "cidades": []
+  },
+  {
+    "estado": "Amapá",
+    "uf": "AP",
+    "cidades": []
+  },
+  {
+    "estado": "Amazonas",
+    "uf": "AM",
+    "cidades": []
+  },
+  {
+    "estado": "Bahia",
+    "uf": "BA",
+    "cidades": []
+  },
+  {
+    "estado": "Ceará",
+    "uf": "CE",
+    "cidades": []
+  },
+  {
+    "estado": "Distrito Federal",
+    "uf": "DF",
+    "cidades": ["Gama", "Ponte Alta Norte", "Recanto das Emas"]
+  },
+  {
+    "estado": "Espírito Santo",
+    "uf": "ES",
+    "cidades": []
+  },
+  {
+    "estado": "Goiás",
+    "uf": "GO",
+    "cidades": []
+  },
+  {
+    "estado": "Maranhão",
+    "uf": "MA",
+    "cidades": []
+  },
+  {
+    "estado": "Mato Grosso",
+    "uf": "MT",
+    "cidades": []
+  },
+  {
+    "estado": "Mato Grosso do Sul",
+    "uf": "MS",
+    "cidades": []
+  },
+  {
+    "estado": "Minas Gerais",
+    "uf": "MG",
+    "cidades": []
+  },
+  {
+    "estado": "Paraná",
+    "uf": "PR",
+    "cidades": []
+  },
+  {
+    "estado": "Paraíba",
+    "uf": "PB",
+    "cidades": []
+  },
+  {
+    "estado": "Pará",
+    "uf": "PA",
+    "cidades": []
+  },
+  {
+    "estado": "Pernambuco",
+    "uf": "PE",
+    "cidades": []
+  },
+  {
+    "estado": "Piauí",
+    "uf": "PI",
+    "cidades": []
+  },
+  {
+    "estado": "Rio Grande do Norte",
+    "uf": "RN",
+    "cidades": []
+  },
+  {
+    "estado": "Rio Grande do Sul",
+    "uf": "RS",
+    "cidades": []
+  },
+  {
+    "estado": "Rio de Janeiro",
+    "uf": "RJ",
+    "cidades": []
+  },
+  {
+    "estado": "Rondônia",
+    "uf": "RO",
+    "cidades": []
+  },
+  {
+    "estado": "Roraima",
+    "uf": "RR",
+    "cidades": []
+  },
+  {
+    "estado": "Santa Catarina",
+    "uf": "SC",
+    "cidades": []
+  },
+  {
+    "estado": "Sergipe",
+    "uf": "SE",
+    "cidades": []
+  },
+  {
+    "estado": "São Paulo",
+    "uf": "SP",
+    "cidades": []
+  },
+  {
+    "estado": "Tocantins",
+    "uf": "TO",
+    "cidades": []
+  }
+]

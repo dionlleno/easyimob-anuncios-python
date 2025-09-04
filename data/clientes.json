@@ -1,0 +1,26 @@
+[
+  {
+    "id_cliente": 1,
+    "nome": "DIEGO SANTOS",
+    "email": "DIEGO@HOTMAIL.COM",
+    "telefone": "6199255666",
+    "tipo_imovel": "APARTAMENTO",
+    "tipo_aquisicao": "ALUGUEL",
+    "cidade_desejado": "RECANTO DAS EMAS",
+    "uf_desejado": "DF",
+    "orcamento": 500.0,
+    "pendente": false
+  },
+  {
+    "id_cliente": 2,
+    "nome": "JUNIOR",
+    "email": "TESTE@TESTE",
+    "telefone": "12121212",
+    "tipo_imovel": "APARTAMENTO",
+    "tipo_aquisicao": "VENDA",
+    "cidade_desejado": "RECANTO DAS EMAS",
+    "uf_desejado": "DF",
+    "orcamento": 5000.0,
+    "pendente": false
+  }
+]
