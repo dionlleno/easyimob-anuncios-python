@@ -18,6 +18,6 @@ class LogGerador:
   def salvar_log(self, titulo: str, conteudo: str, erro: str) -> None:
     try:
       with open(self.path_log, "a", encoding="utf-8") as arquivo:
-        arquivo.write(f"{titulo}: {conteudo} \n -> {erro}")
+        arquivo.write(f"\n{titulo}: {conteudo} \n -> {erro}")
     except Exception as erro:
       print("Erro ao salvar log!\n -> {erro}")

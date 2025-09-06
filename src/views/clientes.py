@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox as msg
 from tkinter import ttk
 from tkinter import font
+from tkinter import filedialog
 from controllers.cliente import ClienteJson
 from controllers.filtros import FiltrosJson
 from models.anuncio import Anuncio
@@ -57,6 +58,7 @@ class ClientesView(ttk.Frame):
         self.varTipoImovel = tk.StringVar(value="")
         self.varTipoAquisicao = tk.StringVar(value="")
         self.varOrcamento = tk.StringVar(value="")
+        self.varPendente = tk.StringVar(value="")
 
         # --- Titulo ---
         tb.Label(self, text="Clientes", font=("Helvetica", 14, "bold")).pack(anchor="w", padx=5, pady=5)
@@ -87,8 +89,8 @@ class ClientesView(ttk.Frame):
         botoes_frame.pack(fill="x", pady=5, padx=3)
         tb.Button(botoes_frame, text="ADICIONAR", bootstyle="secondary", command=self.bt_adicionar).pack(side="left", padx=2)
         tb.Button(botoes_frame, text="EXCLUIR", bootstyle="secondary", command=self.bt_excluir).pack(side="left", padx=2)
-        tb.Button(botoes_frame, text="ATUALIZAR", bootstyle="secondary").pack(side="left", padx=2)
-        tb.Button(botoes_frame, text="IMPORTAR", bootstyle="secondary").pack(side="left", padx=2)
+        tb.Button(botoes_frame, text="ATUALIZAR", bootstyle="secondary", command=self.bt_atualizar).pack(side="left", padx=2)
+        tb.Button(botoes_frame, text="IMPORTAR", bootstyle="secondary", command=self.bt_importar).pack(side="left", padx=2)
 
         # --- LISTAGEM ---
         listagem_frame = tb.LabelFrame(left_frame, text="LISTAGEM", bootstyle="secondary")
@@ -135,11 +137,13 @@ class ClientesView(ttk.Frame):
         tb.Label(cliente_frame, textvariable=self.varTipoAquisicao, font=self.fonte_text).pack(fill="x")
         tb.Label(cliente_frame, text="ORCAMENTO:", font=self.fonte_label).pack(anchor="w", pady=(5,0))
         tb.Label(cliente_frame, textvariable=self.varOrcamento, font=self.fonte_text).pack(fill="x")
+        tb.Label(cliente_frame, text="PENDENTE:", font=self.fonte_label).pack(anchor="w", pady=(5,0))
+        tb.Label(cliente_frame, textvariable=self.varPendente, font=self.fonte_text).pack(fill="x")
 
         botoes_cliente = ttk.Frame(cliente_frame)
         botoes_cliente.pack(fill="x", pady=5)
         tb.Button(botoes_cliente, text="BUSCAR ANUNCIOS", command=self.buscar_anuncios).pack(side="left", expand=True, padx=2)
-        tb.Button(botoes_cliente, text="MARCAR PENDENTE", command=self.marcar_pendente).pack(side="left", expand=True, padx=2)
+        tb.Button(botoes_cliente, text="MARCAR/DESMARCA PENDENTE", command=self.marcar_pendente).pack(side="left", expand=True, padx=2)
 
         # --- ANUNCIOS ---
         anuncios_frame = tb.LabelFrame(right_frame, text="ANUNCIOS", bootstyle="secondary")
@@ -187,7 +191,6 @@ class ClientesView(ttk.Frame):
                 f"R$ {cliente.orcamento}"
             ])
 
-        pass
     def carregar_listagem_anuncios(self, anuncios: list[Anuncio]) -> None:
         self.limpar_listagem(self.anuncios_tree)
         anuncios.sort(key=lambda a: a.cidade)
@@ -201,6 +204,7 @@ class ClientesView(ttk.Frame):
                     f"R$ {anuncio.valor_imovel}",
                     anuncio.link_anuncio
                 ])
+
     def carregar_detalhes_cliente(self, event) -> None:
         selecionado = self.tree.focus()
         if selecionado:
@@ -215,6 +219,7 @@ class ClientesView(ttk.Frame):
             self.varTipoImovel.set(self.cliente.tipo_imovel)
             self.varTipoAquisicao.set(self.cliente.tipo_aquisicao)
             self.varOrcamento.set(f"R$ {self.cliente.orcamento}")
+            self.varPendente.set("SIM" if self.cliente.pendente else "NAO")
 
     def pesquisar(self):
         termo = self.nome_entry.get().upper()
@@ -248,13 +253,22 @@ class ClientesView(ttk.Frame):
 
 
         pass
+
     def marcar_pendente(self):
-        pass
+        if self.varId.get().strip() == "":
+            msg.showerror("ERRO", "CLIENTE NAO SELECIONADO, SELECIONE UM.")
+            return
+        id_cliente = int(self.varId.get().strip())
+        self.jsonCliente.marcar_pendente(id_cliente=id_cliente, pendente=not self.cliente.pendente)
+        self.varPendente.set("SIM" if not self.cliente.pendente else "NAO")
+        self.cliente.pendente = not self.cliente.pendente
+        self.carregar_listagem_clientes(self.jsonCliente.listar_clientes())
+        
 
     def bt_adicionar(self) -> None:
         pop_up = tk.Toplevel(self.main_frame)
         pop_up.title("Adicionar Cliente")
-        pop_up.geometry("300x150")
+        pop_up.geometry("500x500")
 
         nome_var = tk.StringVar()
         email_var = tk.StringVar()
@@ -339,12 +353,17 @@ class ClientesView(ttk.Frame):
                 self.carregar_listagem_clientes(self.jsonCliente.listar_clientes())
         else:
             msg.showerror("ERRO", "CLIENTE NAO SELECIONADO, SELECIONE UM.")
-    
 
     def bt_atualizar(self) -> None:
+
+        selecionado = self.tree.focus()
+        if not selecionado:
+            print(msg.showerror("ERRO", "CLIENTE NAO SELECIONADO, SELECIONE UM."))
+            return
+            valores = self.tree.item(selecionado, "values")
         pop_up = tk.Toplevel(self.main_frame)
         pop_up.title("Adicionar Cliente")
-        pop_up.geometry("300x150")
+        pop_up.geometry("500x500")
 
         id_var = tk.StringVar(value=self.cliente.id_cliente)
         nome_var = tk.StringVar(value=self.cliente.nome)
@@ -392,11 +411,11 @@ class ClientesView(ttk.Frame):
                     continue
                 print(localidade.cidades)
                 self.cb_cidade.config(values=localidade.cidades, state="readonly")
-                self.cb_cidade.current(0)
+                #self.cb_cidade.current(0)
 
         def adicionar():
             cliente = Cliente(
-                id_cliente=id_var.get(),
+                id_cliente=int(id_var.get().strip()),
                 nome=nome_var.get(),
                 email=email_var.get(),
                 telefone=telefone_var.get(),
@@ -408,8 +427,7 @@ class ClientesView(ttk.Frame):
                 pendente=False
             )
 
-            print("AQUIIIII, adicionar a funcao atualizar no controle de cliente e ajustar essa funcao")
-            return
+            
             self.jsonCliente.atualizar_cliente(cliente=cliente)
             msg.showinfo("SUCESSO", "CLIENTE ADICIONADO COM SUCESSO!")
             self.carregar_listagem_clientes(self.jsonCliente.listar_clientes())
@@ -423,7 +441,13 @@ class ClientesView(ttk.Frame):
         cb_uf.bind("<<ComboboxSelected>>", cidade_filtro)
 
     def bt_importar(self) -> None:
-        def importar(self):
-            pass
-        pass
+        caminho_arquivo = filedialog.askopenfilename(
+            title="Selecione um arquivo",
+            filetypes=[("Arquivos de texto", "*.txt"), ("Todos os arquivos", "*.*")]
+        )
+        if not caminho_arquivo:
+            print(f"Nao: {caminho_arquivo}")
+            return
+        self.jsonCliente.importar(caminho_arquivo.strip())
+        self.carregar_listagem_clientes(self.jsonCliente.listar_clientes())
 

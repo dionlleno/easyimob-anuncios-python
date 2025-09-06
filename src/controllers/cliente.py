@@ -18,7 +18,8 @@ class ClienteJson:
       self.log.salvar_log(titulo="Arquivo", conteudo="Arquivo de 'Cliente' nao foi encontrado", erro=erro)
     except Exception as erro:
       self.log.salvar_log(titulo="Geral", conteudo="Erro durante a leitura do arquivo de 'Clientes'", erro=erro)
-    
+      return []
+  
   def salvar_json(self, path, dados: dict) -> None:
     try:
       with open(path, "w", encoding="utf-8") as arquivo:
@@ -67,24 +68,22 @@ class ClienteJson:
 
   def adicionar_cliente(self, cliente: Cliente) -> None:
     dados = self.carregar_json(self.path_clientes)
-    if not self.cliente_existe(cliente=cliente, dados=dados):
-      dados.append(
-        {
-          "id_cliente": self.gerar_id(dados=dados),
-          "nome": cliente.nome.upper(),
-          "email": cliente.email.upper(),
-          "telefone": cliente.telefone.upper(),
-          "tipo_imovel": cliente.tipo_imovel.upper(),
-          "tipo_aquisicao": cliente.tipo_aquisicao.upper(),
-          "cidade_desejado": cliente.cidade_desejada.upper(),
-          "uf_desejado": cliente.uf_desejado.upper(),
-          "orcamento": cliente.orcamento,
-          "pendente": cliente.pendente,
-        }
-      )
-      self.salvar_json(path=self.path_clientes,dados=dados)
-    else:
-      pass
+    #if not self.cliente_existe(cliente=cliente, dados=dados):
+    dados.append(
+      {
+        "id_cliente": self.gerar_id(dados=dados),
+        "nome": cliente.nome.upper(),
+        "email": cliente.email.upper(),
+        "telefone": cliente.telefone.upper(),
+        "tipo_imovel": cliente.tipo_imovel.upper(),
+        "tipo_aquisicao": cliente.tipo_aquisicao.upper(),
+        "cidade_desejado": cliente.cidade_desejada,
+        "uf_desejado": cliente.uf_desejado.upper(),
+        "orcamento": cliente.orcamento,
+        "pendente": cliente.pendente,
+      }
+    )
+    self.salvar_json(path=self.path_clientes,dados=dados)
   
   def excluir_cliente(self, id_cliente: int) -> bool:
     clientes: list[Cliente] = self.listar_clientes()
@@ -104,8 +103,64 @@ class ClienteJson:
           "pendente": cliente.pendente,
         }
       )
-      print("ENCONTRADO E PULANDO")
     self.salvar_json(path=self.path_clientes, dados=novos_dados)
+  
+  def atualizar_cliente(self, cliente: Cliente) -> None:
+    clientes: list[Cliente] = self.listar_clientes()
+    novos_dados = []
+    for c in clientes:
+      if c.id_cliente == cliente.id_cliente:
+        novos_dados.append({
+          "id_cliente": cliente.id_cliente,
+          "nome": cliente.nome.upper(),
+          "email": cliente.email.upper(),
+          "telefone": cliente.telefone.upper(),
+          "tipo_imovel": cliente.tipo_imovel.upper(),
+          "tipo_aquisicao": cliente.tipo_aquisicao.upper(),
+          "cidade_desejado": cliente.cidade_desejada,
+          "uf_desejado": cliente.uf_desejado.upper(),
+          "orcamento": cliente.orcamento,
+          "pendente": cliente.pendente,
+        })
+      else:
+        novos_dados.append({
+          "id_cliente": c.id_cliente,
+          "nome": c.nome.upper(),
+          "email": c.email.upper(),
+          "telefone": c.telefone.upper(),
+          "tipo_imovel": c.tipo_imovel.upper(),
+          "tipo_aquisicao": c.tipo_aquisicao.upper(),
+          "cidade_desejado": c.cidade_desejada,
+          "uf_desejado": c.uf_desejado.upper(),
+          "orcamento": c.orcamento,
+          "pendente": c.pendente,
+        })
+    self.salvar_json(path=self.path_clientes, dados=novos_dados)
+  
+  def importar(self, path_new) -> None:
+    dados = self.carregar_json(path_new)
+    for dado in dados:
+      cliente=Cliente(
+        id_cliente=None,
+        nome=dado.get("nome"),
+        email=dado.get("email"),
+        telefone=dado.get("telefone"),
+        tipo_imovel=dado.get("tipo_imovel"),
+        tipo_aquisicao=dado.get("tipo_aquisicao"),
+        cidade_desejada=dado.get("cidade_desejada"),
+        uf_desejado=dado.get("uf_desejado"),
+        orcamento=dado.get("orcamento"),
+        pendente=dado.get("pendente")
+      )
+      self.adicionar_cliente(cliente=cliente)
+
+  def marcar_pendente(self, id_cliente: int, pendente: bool) -> None:
+    clientes = self.listar_clientes()
+    for cliente in clientes:
+      if cliente.id_cliente == id_cliente:
+        cliente.pendente = pendente
+        self.atualizar_cliente(cliente=cliente)
+        break
 
 if __name__ == "__main__":
   clienteJson = ClienteJson()
