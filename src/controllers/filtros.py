@@ -2,6 +2,8 @@ import json
 import os
 
 from models.localidade import Localidade
+from models.pesquisa import Pesquisa
+from utils.extrator_anuncios import ExtratorAnuncios
 
 class FiltrosJson:
   def __init__(self):
@@ -29,7 +31,7 @@ class FiltrosJson:
   def adicionar_cidade(self, localidade: Localidade) -> None:
     dados = self.carregar_json(self.path_filtro_estado_cidade)
     for dado in dados:
-      if dado.get("uf") == localidade.uf and dado.get("estado") == localidade.estado:
+      if dado.get("uf") == localidade.uf:
         novas_cidades: list[str] = dado.get("cidades", [])
         for cidade in localidade.cidades:
           if cidade not in novas_cidades:
@@ -37,9 +39,7 @@ class FiltrosJson:
         novas_cidades.sort()
         dado["cidades"] = novas_cidades
         break
-      self.salvar_json(path=self.path_filtro_estado_cidade, dados=dados)
-    else:
-      self.adicionar_estado(localidade)
+    self.salvar_json(path=self.path_filtro_estado_cidade, dados=dados)
 
   def adicionar_estado(self, localidade: Localidade) -> None:
     dados = self.carregar_json(path=self.path_filtro_estado_cidade)
@@ -77,4 +77,35 @@ class FiltrosJson:
     return localidades
 
 if __name__ == "__main__":
-  pass
+  filtros = FiltrosJson()
+  extrator = ExtratorAnuncios()
+  localidades = filtros.listar_localidades()
+  for localidade in localidades:
+    pesquisa = Pesquisa(
+      tipo_busca="venda",
+      quant_paginas=3,
+      uf=localidade.uf,
+      orcamento_max=None,
+      quant_vagas=None,
+      quant_quartos=None,
+      quant_banheiros=None
+    )
+    for anuncio in extrator.extrair_anuncios(pesquisa=pesquisa):
+      print(f"UF: {localidade.uf} - Estado: {localidade.estado} - Cidade: {anuncio.cidade}")
+      if anuncio.cidade not in localidade.cidades and anuncio.cidade != "":
+        localidade.cidades.append(anuncio.cidade)
+    filtros.adicionar_cidade(localidade)
+    pesquisa = Pesquisa(
+      tipo_busca="aluguel",
+      quant_paginas=3,
+      uf=localidade.uf,
+      orcamento_max=None,
+      quant_vagas=None,
+      quant_quartos=None,
+      quant_banheiros=None
+    )
+    for anuncio in extrator.extrair_anuncios(pesquisa=pesquisa):
+      print(f"UF: {localidade.uf} - Estado: {localidade.estado} - Cidade: {anuncio.cidade}")
+      if anuncio.cidade not in localidade.cidades:
+        localidade.cidades.append(anuncio.cidade)
+    filtros.adicionar_cidade(localidade)

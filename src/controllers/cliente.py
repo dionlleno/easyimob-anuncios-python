@@ -58,10 +58,13 @@ class ClienteJson:
         telefone=dado.get("telefone"),
         tipo_imovel=dado.get("tipo_imovel"),
         tipo_aquisicao=dado.get("tipo_aquisicao"),
-        cidade_desejada=dado.get("cidade_desejada"),
+        cidade_desejada=dado.get("cidade_desejado"),
         uf_desejado=dado.get("uf_desejado"),
         orcamento=dado.get("orcamento"),
-        pendente=dado.get("pendente")
+        pendente=dado.get("pendente"),
+        quant_vagas=dado.get("quant_vagas"),
+        quant_banheiros=dado.get("quant_banheiros"),
+        quant_quartos=dado.get("quant_quartos")
       )
       clientes.append(cliente)
     return clientes
@@ -81,6 +84,9 @@ class ClienteJson:
         "uf_desejado": cliente.uf_desejado.upper(),
         "orcamento": cliente.orcamento,
         "pendente": cliente.pendente,
+        "quant_vagas": cliente.quant_vagas,
+        "quant_banheiros": cliente.quant_banheiros,
+        "quant_quartos": cliente.quant_quartos
       }
     )
     self.salvar_json(path=self.path_clientes,dados=dados)
@@ -121,6 +127,9 @@ class ClienteJson:
           "uf_desejado": cliente.uf_desejado.upper(),
           "orcamento": cliente.orcamento,
           "pendente": cliente.pendente,
+          "quant_vagas": cliente.quant_vagas,
+          "quant_banheiros": cliente.quant_banheiros,
+          "quant_quartos": cliente.quant_quartos
         })
       else:
         novos_dados.append({
@@ -161,6 +170,11 @@ class ClienteJson:
         cliente.pendente = pendente
         self.atualizar_cliente(cliente=cliente)
         break
+
+  def listar_clientes_pendentes(self) -> list[Cliente]:
+    clientes = self.listar_clientes()
+    pendentes = [cliente for cliente in clientes if cliente.pendente]
+    return pendentes
 
 if __name__ == "__main__":
   clienteJson = ClienteJson()

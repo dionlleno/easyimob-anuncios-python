@@ -47,7 +47,7 @@ class ClientesView(ttk.Frame):
         self.jsonCliente = ClienteJson()
         self.clientes    = self.jsonCliente.listar_clientes()
 
-        self.cliente = Cliente(None,None,None,None,None,None,None,None,None,None)
+        self.cliente = Cliente(None,None,None,None,None,None,None,None,None,None,None,None,None)
 
         self.varId = tk.StringVar(value="")
         self.varNome = tk.StringVar(value="")
@@ -59,6 +59,12 @@ class ClientesView(ttk.Frame):
         self.varTipoAquisicao = tk.StringVar(value="")
         self.varOrcamento = tk.StringVar(value="")
         self.varPendente = tk.StringVar(value="")
+        self.varQuantVagas = tk.StringVar(value="N/A")
+        self.varQuantQuartos = tk.StringVar(value="N/A")
+        self.varQuantBanheiros = tk.StringVar(value="N/A")
+        self.varDetalhes = tk.StringVar(value=f"Vagas: {self.varQuantVagas.get()} - Quartos: {self.varQuantQuartos.get()} - Banheiros: {self.varQuantBanheiros.get()}")
+        
+        self.varCaixaPesquisa = tk.StringVar(value="")
 
         # --- Titulo ---
         tb.Label(self, text="Clientes", font=("Helvetica", 14, "bold")).pack(anchor="w", padx=5, pady=5)
@@ -80,7 +86,7 @@ class ClientesView(ttk.Frame):
         # Nome
         nome_frame = ttk.Frame(filtros_frame)
         nome_frame.pack(fill="x", padx=2)
-        self.nome_entry = ttk.Entry(nome_frame)
+        self.nome_entry = ttk.Entry(nome_frame, textvariable=self.varCaixaPesquisa)
         self.nome_entry.pack(side="left", fill="x", expand=True, padx=2)
         tb.Button(nome_frame, text="PESQUISAR", command=self.pesquisar).pack(side="right", padx=2)
 
@@ -134,7 +140,11 @@ class ClientesView(ttk.Frame):
         tb.Label(cliente_frame, text="TIPO DE IMOVEL:", font=self.fonte_label).pack(anchor="w", pady=(5,0))
         tb.Label(cliente_frame, textvariable=self.varTipoImovel, font=self.fonte_text).pack(fill="x")
         tb.Label(cliente_frame, text="TIPO DE AQUISICAO:", font=self.fonte_label).pack(anchor="w", pady=(5,0))
+
         tb.Label(cliente_frame, textvariable=self.varTipoAquisicao, font=self.fonte_text).pack(fill="x")
+        tb.Label(cliente_frame, text="DETALHES:", font=self.fonte_label).pack(anchor="w", pady=(5,0))
+
+        tb.Label(cliente_frame, textvariable=self.varDetalhes, font=self.fonte_text).pack(fill="x")
         tb.Label(cliente_frame, text="ORCAMENTO:", font=self.fonte_label).pack(anchor="w", pady=(5,0))
         tb.Label(cliente_frame, textvariable=self.varOrcamento, font=self.fonte_text).pack(fill="x")
         tb.Label(cliente_frame, text="PENDENTE:", font=self.fonte_label).pack(anchor="w", pady=(5,0))
@@ -195,21 +205,21 @@ class ClientesView(ttk.Frame):
         self.limpar_listagem(self.anuncios_tree)
         anuncios.sort(key=lambda a: a.cidade)
         for anuncio in anuncios:
-            if self.cliente.tipo_imovel in anuncio.tipo_imovel.upper() or anuncio.tipo_imovel == "Não informado":
-                self.anuncios_tree.insert("", "end", values=[
-                    anuncio.id_anuncio,
-                    anuncio.titulo,
-                    f"{anuncio.uf} - {anuncio.cidade}",
-                    f"{anuncio.area} m²",
-                    f"R$ {anuncio.valor_imovel}",
-                    anuncio.link_anuncio
-                ])
+            self.anuncios_tree.insert("", "end", values=[
+                anuncio.id_anuncio,
+                anuncio.titulo,
+                f"{anuncio.uf} - {anuncio.cidade}",
+                f"{anuncio.area} m²",
+                f"R$ {anuncio.valor_imovel}",
+                anuncio.link_anuncio
+            ])
 
     def carregar_detalhes_cliente(self, event) -> None:
         selecionado = self.tree.focus()
         if selecionado:
             valores = self.tree.item(selecionado, "values")
             self.cliente = self.jsonCliente.buscar_cliente_id(int(valores[0]))
+            print(self.cliente)
             self.varId.set(str(self.cliente.id_cliente))
             self.varNome.set(self.cliente.nome.upper())
             self.varTelefone.set(self.cliente.telefone)
@@ -220,15 +230,19 @@ class ClientesView(ttk.Frame):
             self.varTipoAquisicao.set(self.cliente.tipo_aquisicao)
             self.varOrcamento.set(f"R$ {self.cliente.orcamento}")
             self.varPendente.set("SIM" if self.cliente.pendente else "NAO")
+            self.varQuantBanheiros.set(str(self.cliente.quant_banheiros) if self.cliente.quant_banheiros else "N/A")
+            self.varQuantQuartos.set(str(self.cliente.quant_quartos) if self.cliente.quant_quartos else "N/A")
+            self.varQuantVagas.set(str(self.cliente.quant_vagas) if self.cliente.quant_vagas else "N/A")
+            self.varDetalhes.set(f"Vagas: {self.varQuantVagas.get()} - Quartos: {self.varQuantQuartos.get()} - Banheiros: {self.varQuantBanheiros.get()}")
 
     def pesquisar(self):
-        termo = self.nome_entry.get().upper()
+        termo = self.varCaixaPesquisa.get().strip().upper()
+        filtrados: list[Cliente]= []
         if termo == "":
-            self.carregar_listagem_clientes(self.clientes)
+            self.carregar_listagem_clientes(self.jsonCliente.listar_clientes())
         else:
-            filtrados: list[Cliente]= []
-            for cliente in self.clientes:
-                if termo in cliente.nome or termo in cliente.telefone or termo in cliente.email:
+            for cliente in self.jsonCliente.listar_clientes():
+                if termo in cliente.nome.upper() or termo in cliente.telefone or termo in cliente.email.upper():
                     filtrados.append(cliente)
             self.carregar_listagem_clientes(filtrados)
 
@@ -238,21 +252,26 @@ class ClientesView(ttk.Frame):
             quant_paginas=5,
             uf=self.cliente.uf_desejado,
             orcamento_max=self.cliente.orcamento,
-            quant_vagas=None,
-            quant_banheiros=None,
-            quant_quartos=None
+            quant_vagas=self.cliente.quant_vagas,
+            quant_banheiros=self.cliente.quant_banheiros,
+            quant_quartos=self.cliente.quant_quartos
         )
         anuncios = self.extrator.extrair_anuncios(pesquisa=pesquisa)
-        self.carregar_listagem_anuncios(anuncios=anuncios)
+        anun = []
+        for anuncio in anuncios:
+            if anuncio.cidade.upper() == self.cliente.cidade_desejada.upper():
+                anun.append(anuncio)
+        if len(anun) == 0:
+            msg.showinfo("INFO", "NENHUM ANUNCIO ENCONTRADO PARA ESSA CIDADE, MOSTRANDO OUTRAS CIDADES.")
+            anun = anuncios
+        self.carregar_listagem_anuncios(anuncios=anun)
     
     def abrir_anuncio(self, event):
         anuncio_selecionado = self.anuncios_tree.focus()
         if anuncio_selecionado:
             valores_anuncio = self.anuncios_tree.item(anuncio_selecionado, "values")
-            webbrowser.open(valores_anuncio[3])
-
-
-        pass
+            print(f"Abrindo link do anúncio: {valores_anuncio[5]}")
+            webbrowser.open(valores_anuncio[5])
 
     def marcar_pendente(self):
         if self.varId.get().strip() == "":
@@ -262,8 +281,6 @@ class ClientesView(ttk.Frame):
         self.jsonCliente.marcar_pendente(id_cliente=id_cliente, pendente=not self.cliente.pendente)
         self.varPendente.set("SIM" if not self.cliente.pendente else "NAO")
         self.cliente.pendente = not self.cliente.pendente
-        self.carregar_listagem_clientes(self.jsonCliente.listar_clientes())
-        
 
     def bt_adicionar(self) -> None:
         pop_up = tk.Toplevel(self.main_frame)
@@ -278,6 +295,9 @@ class ClientesView(ttk.Frame):
         tipo_aquisicao_var = tk.StringVar()
         cidade_desejada_var = tk.StringVar()
         uf_desejada_var = tk.StringVar()
+        quant_vagas_var = tk.StringVar()
+        quant_quartos_var = tk.StringVar()
+        quant_banheiros_var = tk.StringVar()
 
         tb.Label(pop_up, text="NOME:").grid(row=1, column=0, padx=5, pady=5, sticky=W)
         ttk.Entry(pop_up, textvariable=nome_var).grid(row=1, column=1, padx=5, pady=5)
@@ -288,25 +308,33 @@ class ClientesView(ttk.Frame):
         tb.Label(pop_up, text="ORCAMENTO:").grid(row=4, column=0, padx=5, pady=5, sticky=W)
         ttk.Entry(pop_up, textvariable=orcamento_var).grid(row=4, column=1, padx=5, pady=5)
 
-        tb.Label(pop_up, text="Tipo de Imóvel").grid(row=5, column=0, padx=10, pady=5, sticky=W)
+        tb.Label(pop_up, text="QUANT. QUARTOS:").grid(row=5, column=0, padx=5, pady=5, sticky=W)
+        ttk.Entry(pop_up, textvariable=quant_quartos_var).grid(row=5, column=1, padx=5, pady=5)
+        tb.Label(pop_up, text="QUANT. BANHEIROS:").grid(row=6, column=0, padx=5, pady=5, sticky=W)
+        ttk.Entry(pop_up, textvariable=quant_banheiros_var).grid(row=6, column=1, padx=5, pady=5)
+
+        tb.Label(pop_up, text="QUANT. VAGAS:").grid(row=7, column=0, padx=5, pady=5, sticky=W)
+        ttk.Entry(pop_up, textvariable=quant_vagas_var).grid(row=7, column=1, padx=5, pady=5)
+
+        tb.Label(pop_up, text="Tipo de Imóvel").grid(row=8, column=0, padx=10, pady=5, sticky=W)
         cb_imovel = ttk.Combobox(pop_up, textvariable=tipo_imovel_var, values=self.tipos_imovel, state="readonly", width=28)
-        cb_imovel.grid(row=5, column=1, padx=10, pady=5)
+        cb_imovel.grid(row=8, column=1, padx=10, pady=5)
         cb_imovel.current(0)
 
-        tb.Label(pop_up, text="Tipo de Aquisicao").grid(row=6, column=0, padx=10, pady=5, sticky=W)
+        tb.Label(pop_up, text="Tipo de Aquisicao").grid(row=9, column=0, padx=10, pady=5, sticky=W)
         cb_aquisicao = ttk.Combobox(pop_up, textvariable=tipo_aquisicao_var, values=self.tipos_aquisicao, state="readonly", width=28)
-        cb_aquisicao.grid(row=6, column=1, padx=10, pady=5)
+        cb_aquisicao.grid(row=9, column=1, padx=10, pady=5)
         cb_aquisicao.current(0)
         
-        tb.Label(pop_up, text="UF DESEJADA").grid(row=7, column=0, padx=10, pady=5, sticky=W)
+        tb.Label(pop_up, text="UF DESEJADA").grid(row=10, column=0, padx=10, pady=5, sticky=W)
         cb_uf = ttk.Combobox(pop_up, textvariable=uf_desejada_var, values=self.ufs, state="readonly", width=28)
-        cb_uf.grid(row=7, column=1, padx=10, pady=5)
+        cb_uf.grid(row=10, column=1, padx=10, pady=5)
         cb_uf.current(0)
 
 
-        tb.Label(pop_up, text="Cidade Desejada").grid(row=8, column=0, padx=10, pady=5, sticky=W)
+        tb.Label(pop_up, text="Cidade Desejada").grid(row=11, column=0, padx=10, pady=5, sticky=W)
         self.cb_cidade = ttk.Combobox(pop_up, textvariable=cidade_desejada_var, state="disabled", width=28)
-        self.cb_cidade.grid(row=8, column=1, padx=10, pady=5)
+        self.cb_cidade.grid(row=11, column=1, padx=10, pady=5)
 
         def cidade_filtro(event):
             uf = uf_desejada_var.get()
@@ -328,7 +356,10 @@ class ClientesView(ttk.Frame):
                 uf_desejado=uf_desejada_var.get(),
                 cidade_desejada=cidade_desejada_var.get(),
                 orcamento=float(orcamento_var.get()),
-                pendente=False
+                pendente=False,
+                quant_quartos=int(quant_quartos_var.get()) if quant_quartos_var.get().strip().isdigit() else None,
+                quant_banheiros=int(quant_banheiros_var.get()) if quant_banheiros_var.get().strip().isdigit() else None,
+                quant_vagas=int(quant_vagas_var.get()) if quant_vagas_var.get().strip().isdigit() else None,
             )
             self.jsonCliente.adicionar_cliente(cliente=cliente)
             msg.showinfo("SUCESSO", "CLIENTE ADICIONADO COM SUCESSO!")
@@ -336,9 +367,9 @@ class ClientesView(ttk.Frame):
             pop_up.destroy()
 
         bt_fechar = tb.Button(pop_up, text="FECHAR", command=pop_up.destroy)
-        bt_fechar.grid(row=9, column=0)
+        bt_fechar.grid(row=12, column=0)
         bt_avancar = tb.Button(pop_up, text="AVANCAR", command=adicionar)
-        bt_avancar.grid(row=9, column=1)
+        bt_avancar.grid(row=12, column=1)
 
         cb_uf.bind("<<ComboboxSelected>>", cidade_filtro)
 
@@ -355,15 +386,15 @@ class ClientesView(ttk.Frame):
             msg.showerror("ERRO", "CLIENTE NAO SELECIONADO, SELECIONE UM.")
 
     def bt_atualizar(self) -> None:
-
         selecionado = self.tree.focus()
         if not selecionado:
             print(msg.showerror("ERRO", "CLIENTE NAO SELECIONADO, SELECIONE UM."))
             return
-            valores = self.tree.item(selecionado, "values")
         pop_up = tk.Toplevel(self.main_frame)
         pop_up.title("Adicionar Cliente")
         pop_up.geometry("500x500")
+
+        self.cliente = self.jsonCliente.buscar_cliente_id(int(self.tree.item(selecionado, "values")[0]))
 
         id_var = tk.StringVar(value=self.cliente.id_cliente)
         nome_var = tk.StringVar(value=self.cliente.nome)
@@ -374,6 +405,9 @@ class ClientesView(ttk.Frame):
         tipo_aquisicao_var = tk.StringVar(value=self.cliente.tipo_aquisicao)
         cidade_desejada_var = tk.StringVar(value=self.cliente.cidade_desejada)
         uf_desejada_var = tk.StringVar(value=self.cliente.uf_desejado)
+        quant_vagas_var = tk.StringVar(value=self.cliente.quant_vagas)
+        quant_quartos_var = tk.StringVar(value=self.cliente.quant_quartos)
+        quant_banheiros_var = tk.StringVar(value=self.cliente.quant_banheiros)
 
         tb.Label(pop_up, text="NOME:").grid(row=1, column=0, padx=5, pady=5, sticky=W)
         ttk.Entry(pop_up, textvariable=nome_var).grid(row=1, column=1, padx=5, pady=5)
@@ -383,26 +417,33 @@ class ClientesView(ttk.Frame):
         ttk.Entry(pop_up, textvariable=email_var).grid(row=3, column=1, padx=5, pady=5)
         tb.Label(pop_up, text="ORCAMENTO:").grid(row=4, column=0, padx=5, pady=5, sticky=W)
         ttk.Entry(pop_up, textvariable=orcamento_var).grid(row=4, column=1, padx=5, pady=5)
+        tb.Label(pop_up, text="QUANT. QUARTOS:").grid(row=5, column=0, padx=5, pady=5, sticky=W)
+        ttk.Entry(pop_up, textvariable=quant_quartos_var).grid(row=5, column=1, padx=5, pady=5)
+        tb.Label(pop_up, text="QUANT. BANHEIROS:").grid(row=6, column=0, padx=5, pady=5, sticky=W)
+        ttk.Entry(pop_up, textvariable=quant_banheiros_var).grid(row=6, column=1, padx=5, pady=5)
 
-        tb.Label(pop_up, text="Tipo de Imóvel").grid(row=5, column=0, padx=10, pady=5, sticky=W)
+        tb.Label(pop_up, text="QUANT. VAGAS:").grid(row=7, column=0, padx=5, pady=5, sticky=W)
+        ttk.Entry(pop_up, textvariable=quant_vagas_var).grid(row=7, column=1, padx=5, pady=5)
+
+        tb.Label(pop_up, text="Tipo de Imóvel").grid(row=8, column=0, padx=10, pady=5, sticky=W)
         cb_imovel = ttk.Combobox(pop_up, textvariable=tipo_imovel_var, values=self.tipos_imovel, state="readonly", width=28)
-        cb_imovel.grid(row=5, column=1, padx=10, pady=5)
+        cb_imovel.grid(row=8, column=1, padx=10, pady=5)
         cb_imovel.current(0)
 
-        tb.Label(pop_up, text="Tipo de Aquisicao").grid(row=6, column=0, padx=10, pady=5, sticky=W)
+        tb.Label(pop_up, text="Tipo de Aquisicao").grid(row=9, column=0, padx=10, pady=5, sticky=W)
         cb_aquisicao = ttk.Combobox(pop_up, textvariable=tipo_aquisicao_var, values=self.tipos_aquisicao, state="readonly", width=28)
-        cb_aquisicao.grid(row=6, column=1, padx=10, pady=5)
+        cb_aquisicao.grid(row=9, column=1, padx=10, pady=5)
         cb_aquisicao.current(0)
         
-        tb.Label(pop_up, text="UF DESEJADA").grid(row=7, column=0, padx=10, pady=5, sticky=W)
+        tb.Label(pop_up, text="UF DESEJADA").grid(row=10, column=0, padx=10, pady=5, sticky=W)
         cb_uf = ttk.Combobox(pop_up, textvariable=uf_desejada_var, values=self.ufs, state="readonly", width=28)
-        cb_uf.grid(row=7, column=1, padx=10, pady=5)
-        cb_uf.current(0)
+        cb_uf.grid(row=10, column=1, padx=10, pady=5)
+        cb_uf.current(self.ufs.index(self.cliente.uf_desejado) if self.cliente.uf_desejado in self.ufs else 0)
 
 
-        tb.Label(pop_up, text="Cidade Desejada").grid(row=8, column=0, padx=10, pady=5, sticky=W)
-        self.cb_cidade = ttk.Combobox(pop_up, textvariable=cidade_desejada_var, state="disabled", width=28)
-        self.cb_cidade.grid(row=8, column=1, padx=10, pady=5)
+        tb.Label(pop_up, text="Cidade Desejada").grid(row=11, column=0, padx=10, pady=5, sticky=W)
+        self.cb_cidade = ttk.Combobox(pop_up, textvariable=cidade_desejada_var, state="enabled", width=28)
+        self.cb_cidade.grid(row=11, column=1, padx=10, pady=5)
 
         def cidade_filtro(event):
             uf = uf_desejada_var.get()
@@ -411,7 +452,6 @@ class ClientesView(ttk.Frame):
                     continue
                 print(localidade.cidades)
                 self.cb_cidade.config(values=localidade.cidades, state="readonly")
-                #self.cb_cidade.current(0)
 
         def adicionar():
             cliente = Cliente(
@@ -424,7 +464,10 @@ class ClientesView(ttk.Frame):
                 uf_desejado=uf_desejada_var.get(),
                 cidade_desejada=cidade_desejada_var.get(),
                 orcamento=float(orcamento_var.get()),
-                pendente=False
+                pendente=False,
+                quant_quartos=int(quant_quartos_var.get()) if quant_quartos_var.get().strip().isdigit() else None,
+                quant_banheiros=int(quant_banheiros_var.get()) if quant_banheiros_var.get().strip().isdigit() else None,
+                quant_vagas=int(quant_vagas_var.get()) if quant_vagas_var.get().strip().isdigit() else None,
             )
 
             
@@ -434,9 +477,9 @@ class ClientesView(ttk.Frame):
             pop_up.destroy()
 
         bt_fechar = tb.Button(pop_up, text="FECHAR", command=pop_up.destroy)
-        bt_fechar.grid(row=9, column=0)
+        bt_fechar.grid(row=12, column=0)
         bt_avancar = tb.Button(pop_up, text="AVANCAR", command=adicionar)
-        bt_avancar.grid(row=9, column=1)
+        bt_avancar.grid(row=12, column=1)
 
         cb_uf.bind("<<ComboboxSelected>>", cidade_filtro)
 

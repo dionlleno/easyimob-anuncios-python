@@ -210,13 +210,15 @@ if __name__ == "__main__":
   pesquisa = Pesquisa(
     tipo_busca="aluguel",
     quant_paginas=5,
-    uf="sp",
-    orcamento_max=5000,
-    quant_vagas=1,
-    quant_quartos=2,
-    quant_banheiros=3
+    uf="df",
+    orcamento_max=None,
+    quant_vagas=None,
+    quant_quartos=None,
+    quant_banheiros=None
   )
   extrator = ExtratorAnuncios()
   anuncios = extrator.extrair_anuncios(pesquisa=pesquisa)
   for anuncio in anuncios:
-    print(anuncio)
+    print(anuncio.cidade)
+    if "Recanto das Emas" in anuncio.cidade:
+      print(anuncio)
