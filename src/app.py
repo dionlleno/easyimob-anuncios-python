@@ -2,12 +2,15 @@ import tkinter as tk
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 from controllers.cliente import ClienteJson
+from controllers.pendencia import PendenciaJson
 from models.pesquisa import Pesquisa
 from utils.extrator_anuncios import ExtratorAnuncios
 from views.clientes import ClientesView
 from views.anuncios import AnunciosView
 from views.pendentes import PendentesView
 from views.ajustes import AjustesView
+from tkinter import messagebox as msg
+
 
 class App(tb.Window):
     def __init__(self):
@@ -32,13 +35,15 @@ class App(tb.Window):
 
 if __name__ == "__main__":
     jsonCliente = ClienteJson()
+    jsonPendencia = ClienteJson()
     extrator = ExtratorAnuncios()
+    jsonPendencia = PendenciaJson()
     clientes_pendentes = jsonCliente.listar_clientes_pendentes()
     for cliente in clientes_pendentes:
         print(f"Cliente Pendente: {cliente.nome} - {cliente.email}")
         pesquisa = Pesquisa(
             tipo_busca = cliente.tipo_aquisicao.lower(),
-            quant_paginas=5,
+            quant_paginas=1,
             uf=cliente.uf_desejado,
             orcamento_max=cliente.orcamento,
             quant_vagas=cliente.quant_vagas,
@@ -46,5 +51,10 @@ if __name__ == "__main__":
             quant_quartos=cliente.quant_quartos
         )
         anuncios = extrator.extrair_anuncios(pesquisa=pesquisa)
+        if len(anuncios) > 3:
+            msg.showinfo("Novos Anúncios Encontrados", f"Foram encontrados {len(anuncios)} novos anúncios para o cliente {cliente.nome}.")
+            #jsonCliente.marcar_pendente(id_cliente=cliente.id_cliente, pendente=False)
+        for anuncio in anuncios:
+            jsonPendencia.adicionar_anuncio_pendente(id_cliente=cliente.id_cliente, anuncio=anuncio)
     app = App()
     app.mainloop()

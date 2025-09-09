@@ -8,22 +8,22 @@
     "tipo_aquisicao": "ALUGUEL",
     "cidade_desejado": "Recanto das Emas",
     "uf_desejado": "DF",
-    "orcamento": 1200000.0,
-    "pendente": true,
-    "quant_vagas": null,
-    "quant_banheiros": null,
-    "quant_quartos": null
+    "orcamento": 1200.0,
+    "pendente": true
   },
   {
     "id_cliente": 2,
     "nome": "DIONLLLENO",
     "email": "TESTE@TESTE",
     "telefone": "121212121212",
-    "tipo_imovel": "QUARTO",
-    "tipo_aquisicao": "TEMPORADA",
+    "tipo_imovel": "CASA",
+    "tipo_aquisicao": "VENDA",
     "cidade_desejado": "Jardim Londres",
     "uf_desejado": "SP",
     "orcamento": 5000.0,
-    "pendente": false
+    "pendente": false,
+    "quant_vagas": null,
+    "quant_banheiros": null,
+    "quant_quartos": null
   }
 ]

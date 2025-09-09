@@ -11,13 +11,14 @@ class FiltrosJson:
   
   def carregar_json(self, path) -> dict:
     if not os.path.exists(path):
-      return {}
+      return []
     try:
       with open(path, 'r', encoding='utf-8') as arquivo:
         return json.load(arquivo)
     except FileNotFoundError as erro:
       print(f"Arquivo nao encontrado -> {path}")
       print(f"Erro: {erro}")
+      return []
     
   def salvar_json(self, path, dados) -> None:
     try:
