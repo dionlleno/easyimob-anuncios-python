@@ -41,7 +41,7 @@ class PendenciaJson:
         print(a)
         for anuncio in a:
           anuncios.append(Anuncio(
-            id_anuncio=anuncio.get("id_anuncio"),
+            id_anuncio=int(anuncio.get("id_anuncio")),
             titulo=anuncio.get("titulo"),
             link_anuncio=anuncio.get("link_anuncio"),
             link_imagens=anuncio.get("link_imagens", []),
@@ -71,13 +71,13 @@ class PendenciaJson:
         continue
       if dado.get("id_cliente") == id_cliente:
         anuncios_encontrados = dado.get("anuncios_encontrados", [])
-        anuncios_encontrados.append(anuncio.to_dict())
+        anuncios_encontrados.append(anuncio)
         dado["anuncios_encontrados"] = anuncios_encontrados
         self.salvar_json(path=self.path_anuncios, dados=dados)
         return None
     dados.append({
       "id_cliente": id_cliente,
-      "anuncios_encontrados": [anuncio.to_dict()]
+      "anuncios_encontrados": [anuncio]
     })
     self.salvar_json(path=self.path_anuncios, dados=dados)
 

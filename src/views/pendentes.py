@@ -19,7 +19,7 @@ class PendentesView(ttk.Frame):
 
         # --- Tabela de pend�ncias ---
 
-        colunas = ("id", "nome", "tipo_imovel", "tipo_aquisicao", "uf_desejada", "orcamento")
+        colunas = ("id", "nome", "tipo_imovel", "tipo_aquisicao", "uf_desejada", "orcamento", "total_anuncios")
         self.tree = ttk.Treeview(self, columns=colunas, show="headings", height=12)
 
         self.tree.heading("nome", text="NOME")
@@ -27,6 +27,7 @@ class PendentesView(ttk.Frame):
         self.tree.heading("tipo_aquisicao", text="TIPO DE AQUISICAO")
         self.tree.heading("uf_desejada", text="UF DESEJADA")
         self.tree.heading("orcamento", text="ORCAMENTO")
+        self.tree.heading("total_anuncios", text="TOTAL ANUNCIOS")
 
         self.tree.column("id", width=0, stretch=False)
         self.tree.column("nome")
@@ -34,6 +35,7 @@ class PendentesView(ttk.Frame):
         self.tree.column("uf_desejada", width=20, anchor="center")
         self.tree.column("tipo_imovel", width=30, anchor="center")
         self.tree.column("tipo_aquisicao", width=30, anchor="center")
+        self.tree.column("total_anuncios", width=30, anchor="center")
 
         self.tree.pack(fill="both", expand=True, padx=5, pady=5)
         self.tree.bind("<Double-1>", self.carregar_popup_listagem_anuncios)
@@ -61,7 +63,8 @@ class PendentesView(ttk.Frame):
                 cliente.tipo_imovel,
                 cliente.tipo_aquisicao,
                 cliente.uf_desejado,
-                f"R$ {cliente.orcamento:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+                f"R$ {cliente.orcamento:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                len(self.jsonPendencia.listar_anuncios_pendentes(id_cliente=cliente.id_cliente))
             ))
     
     def atualizar_pendentes(self):

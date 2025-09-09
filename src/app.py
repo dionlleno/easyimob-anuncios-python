@@ -51,10 +51,13 @@ if __name__ == "__main__":
             quant_quartos=cliente.quant_quartos
         )
         anuncios = extrator.extrair_anuncios(pesquisa=pesquisa)
-        if len(anuncios) > 3:
-            msg.showinfo("Novos Anúncios Encontrados", f"Foram encontrados {len(anuncios)} novos anúncios para o cliente {cliente.nome}.")
-            #jsonCliente.marcar_pendente(id_cliente=cliente.id_cliente, pendente=False)
+        #jsonCliente.marcar_pendente(id_cliente=cliente.id_cliente, pendente=False)
+        anu = []
         for anuncio in anuncios:
-            jsonPendencia.adicionar_anuncio_pendente(id_cliente=cliente.id_cliente, anuncio=anuncio)
+            if anuncio.cidade.upper() != cliente.cidade_desejada.upper():
+                continue
+            anu.append(anuncio)
+        msg.showinfo("Novos Anúncios Encontrados", f"Foram encontrados {len(anu)} novos anúncios para o cliente {cliente.nome}.")
+        jsonPendencia.adicionar_anuncio_pendente(id_cliente=cliente.id_cliente, anuncio=anu)
     app = App()
     app.mainloop()
