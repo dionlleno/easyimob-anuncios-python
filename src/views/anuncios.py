@@ -3,9 +3,14 @@ from tkinter import ttk
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 
+from models.anuncio import Anuncio
+from utils.extrator_anuncios import ExtratorAnuncios
+
 class AnunciosView(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
+
+        self.extrator = ExtratorAnuncios()
 
         # --- Título ---
         ttk.Label(self, text="Anúncios", font=("TkDefaultFont", 14, "bold")).pack(anchor="w", padx=10, pady=10)
@@ -45,15 +50,19 @@ class AnunciosView(ttk.Frame):
         listagem_frame = ttk.LabelFrame(left_frame, text="LISTAGEM", bootstyle="secondary")
         listagem_frame.pack(fill="both", expand=True, padx=5, pady=5)
 
-        colunas = ("tipo_imovel", "tipo_aquisicao", "area", "endereco")
-        self.tree = ttk.Treeview(listagem_frame, columns=colunas, show="headings", height=10)
-
-        self.tree.heading("tipo_imovel", text="TIPO DE IMOVEL")
-        self.tree.heading("tipo_aquisicao", text="TIPO DE AQUISIÇÃO")
-        self.tree.heading("area", text="ÁREA")
-        self.tree.heading("endereco", text="ENDEREÇO")
-
-        self.tree.pack(fill="both", expand=True)
+        self.anuncios_tree = ttk.Treeview(listagem_frame, columns=("id", "titulo", "endereco", "area", "valor", "link"), show="headings", height=8)
+        self.anuncios_tree.heading("titulo", text="TITULO")
+        self.anuncios_tree.heading("valor", text="VALOR")
+        self.anuncios_tree.heading("endereco", text="ENDERECO")
+        self.anuncios_tree.heading("area", text="AREA")
+        self.anuncios_tree.pack(fill="both", expand=True)
+        
+        self.anuncios_tree.column("id", width=0, stretch=False)
+        self.anuncios_tree.column("link", width=0, stretch=False)
+        self.anuncios_tree.column("titulo", width=400, anchor="w", stretch=True)
+        self.anuncios_tree.column("endereco", width=200, anchor="center")
+        self.anuncios_tree.column("area", width=20, anchor="center")
+        self.anuncios_tree.column("valor", width=20, anchor="center")
 
         # --- DETALHES (lado direito) ---
         fotos_frame = ttk.Frame(right_frame)
@@ -75,19 +84,20 @@ class AnunciosView(ttk.Frame):
         info_frame = ttk.Frame(right_frame)
         info_frame.pack(fill="both", expand=True, padx=5, pady=5)
 
-        labels = [
-            "TIPO DE IMOVEL:",
-            "TIPO DE AQUISIÇÃO:",
-            "CIDADE:",
-            "ESTADO/UF:",
-            "VALOR FINAL:",
-            "VALOR IPTU:",
-            "VALOR CONDOMINIO:",
-            "ÁREA:",
-            "QUANT. QUARTOS:",
-            "QUANT. BANHEIROS:",
-            "QUANT. VAGAS DE GARAGEM:"
-        ]
-
-        for text in labels:
-            ttk.Label(info_frame, text=text).pack(anchor="w", pady=1)
+    def limpar_listagem(self, tree) -> None:
+        for item in tree.get_children():
+            self.anuncios_tree.delete(item)
+    
+    def carregar_anuncios(self, anuncios) -> None:
+        self.limpar_listagem(self.anuncios_tree)
+        
+        anuncios: list[Anuncio]= self.extrator.extrair_anuncios()
+        for anuncio in anuncios:
+            self.anuncios_tree.insert("", "end", values=(
+                anuncio.id_anuncio,
+                anuncio.titulo,
+                anuncio.endereco,
+                anuncio.area,
+                f"R$ {anuncio.valor},
+                
+            ))
