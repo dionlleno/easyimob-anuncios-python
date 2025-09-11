@@ -1,3 +1,6 @@
+from models.pesquisa import Pesquisa
+
+
 class Cliente:
   def __init__(self, nome: str, email: str, telefone: str, tipo_imovel: str, tipo_aquisicao: str, cidade_desejada: str, uf_desejado: str, orcamento: float, pendente: bool = False, id_cliente: int = None, quant_vagas: int = None, quant_banheiros: int = None, quant_quartos: int = None):
     self.id_cliente = id_cliente
@@ -13,6 +16,17 @@ class Cliente:
     self.quant_quartos = quant_quartos
     self.orcamento = orcamento
     self.pendente = pendente
+  
+  def gerar_pesquisa(self):
+    return Pesquisa(
+      tipo_busca = self.tipo_aquisicao.lower(),
+      quant_paginas=1,
+      uf=self.uf_desejado,
+      orcamento_max=self.orcamento,
+      quant_vagas=self.quant_vagas,
+      quant_banheiros=self.quant_banheiros,
+      quant_quartos=self.quant_quartos  
+    )
   
   def to_dict(self):
     return {

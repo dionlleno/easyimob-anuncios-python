@@ -6,6 +6,7 @@ from ttkbootstrap.constants import *
 
 from controllers.cliente import ClienteJson
 from controllers.pendencia import PendenciaJson
+from utils.extrator_anuncios import ExtratorAnuncios
 
 class PendentesView(ttk.Frame):
     def __init__(self, parent):
@@ -13,11 +14,9 @@ class PendentesView(ttk.Frame):
 
         self.jsonCliente = ClienteJson()
         self.jsonPendencia = PendenciaJson()
+        self.extrator = ExtratorAnuncios()
 
-        # --- T�tulo ---
-        ttk.Label(self, text="Pend�ncias", font=("TkDefaultFont", 14, "bold")).pack(anchor="w", padx=10, pady=10)
-
-        # --- Tabela de pend�ncias ---
+        ttk.Label(self, text="Pendencias", font=("TkDefaultFont", 14, "bold")).pack(anchor="w", padx=10, pady=10)
 
         colunas = ("id", "nome", "tipo_imovel", "tipo_aquisicao", "uf_desejada", "orcamento", "total_anuncios")
         self.tree = ttk.Treeview(self, columns=colunas, show="headings", height=12)
@@ -40,13 +39,12 @@ class PendentesView(ttk.Frame):
         self.tree.pack(fill="both", expand=True, padx=5, pady=5)
         self.tree.bind("<Double-1>", self.carregar_popup_listagem_anuncios)
 
-        # --- Bot�es de a��o ---
         botoes_frame = ttk.Frame(self)
         botoes_frame.pack(fill="x", padx=10, pady=10)
 
         ttk.Button(botoes_frame, text="REMOVER", command=self.remover_pendente, bootstyle="danger").pack(side="left", padx=5)
         ttk.Button(botoes_frame, text="ATUALIZAR", command=self.atualizar_pendentes, bootstyle="secondary").pack(side="left", padx=5)
-        ttk.Button(botoes_frame, text="BUSCAR ANUNCIOS", command=self.atualizar_anuncios_pendentes, bootstyle="secondary").pack(side="left", padx=5)
+        ttk.Button(botoes_frame, text="BUSCAR ANUNCIOS", command=self.buscar_anuncios_pendentes, bootstyle="secondary").pack(side="left", padx=5)
 
         self.carregar_clientes_pendentes()
     
@@ -80,12 +78,6 @@ class PendentesView(ttk.Frame):
         else:
             msg.showwarning("ATENCAO", "NENHUM CLIENTE SELECIONADO.")
 
-    def exibir_cliente_pendente(self):
-        pass
-
-    def atualizar_anuncios_pendentes(self):
-        pass
-
     def carregar_popup_listagem_anuncios(self, event) -> None:
         selecionado = self.tree.focus()
         if not selecionado:
@@ -99,35 +91,29 @@ class PendentesView(ttk.Frame):
         pop_up.title("Adicionar Cliente")
         pop_up.geometry("500x500")
 
-
         anuncios_frame = tb.LabelFrame(pop_up, text="ANUNCIOS", bootstyle="secondary")
         anuncios_frame.pack(fill="both", padx=5, pady=5, expand=True)
 
-        self.anuncios_tree = ttk.Treeview(anuncios_frame, columns=("id", "titulo", "endereco", "area", "valor", "link"), show="headings", height=8)
-        self.anuncios_tree.heading("titulo", text="TITULO")
-        self.anuncios_tree.heading("valor", text="VALOR")
-        self.anuncios_tree.heading("endereco", text="ENDERECO")
-        self.anuncios_tree.heading("area", text="AREA")
-        self.anuncios_tree.pack(fill="both", expand=True)
+        anuncios_tree = ttk.Treeview(anuncios_frame, columns=("id", "titulo", "endereco", "area", "valor", "link"), show="headings", height=8)
+        anuncios_tree.heading("titulo", text="TITULO")
+        anuncios_tree.heading("valor", text="VALOR")
+        anuncios_tree.heading("endereco", text="ENDERECO")
+        anuncios_tree.heading("area", text="AREA")
+        anuncios_tree.pack(fill="both", expand=True)
         
-        self.anuncios_tree.column("id", width=0, stretch=False)
-        self.anuncios_tree.column("link", width=0, stretch=False)
-        self.anuncios_tree.column("titulo", width=400, anchor="w", stretch=True)
-        self.anuncios_tree.column("endereco", width=200, anchor="center")
-        self.anuncios_tree.column("area", width=20, anchor="center")
-        self.anuncios_tree.column("valor", width=20, anchor="center")
+        anuncios_tree.column("id", width=0, stretch=False)
+        anuncios_tree.column("link", width=0, stretch=False)
+        anuncios_tree.column("titulo", width=400, anchor="w", stretch=True)
+        anuncios_tree.column("endereco", width=200, anchor="center")
+        anuncios_tree.column("area", width=20, anchor="center")
+        anuncios_tree.column("valor", width=20, anchor="center")
 
-        #self.anuncios_tree.bind("<Double-1>", abrir_anuncio)
-
-        self.limpar_listagem(self.anuncios_tree)
+        self.limpar_listagem(anuncios_tree)
 
         anuncios = self.jsonPendencia.listar_anuncios_pendentes(id_cliente=id_cliente)
-        if not anuncios:
-            msg.showinfo("INFORMACAO", "NENHUM ANUNCIO PENDENTE PARA ESTE CLIENTE.")
-            pop_up.destroy()
-            return None
+        print(f"ANUNCIOS ENCONTRADOS: {len(anuncios)}")
         for anuncio in anuncios:
-            self.anuncios_tree.insert("", "end", values=(
+            anuncios_tree.insert("", "end", values=(
                 anuncio.id_anuncio,
                 anuncio.titulo,
                 f"{anuncio.bairro} - {anuncio.cidade}/{anuncio.uf}",
@@ -135,14 +121,37 @@ class PendentesView(ttk.Frame):
                 f"R$ {anuncio.valor_imovel:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") if anuncio.valor_imovel else "N/A",
                 anuncio.link_anuncio
             ))
-        def abrir_anuncio(self, event) -> None:
-            selecionado = self.anuncios_tree.focus()
+        def abrir_anuncio(event) -> None:
+            selecionado = anuncios_tree.focus()
             if not selecionado:
                 msg.showwarning("ATENCAO", "NENHUM ANUNCIO SELECIONADO.")
                 return None
-            valores = self.anuncios_tree.item(selecionado, "values")
+            valores = anuncios_tree.item(selecionado, "values")
             link = valores[5]
             print(f"LINK DO ANUNCIO: {link}")
             import webbrowser
             webbrowser.open(link)
+
+        anuncios_tree.bind("<Double-1>", abrir_anuncio)
+
+    def buscar_anuncios_pendentes(self) -> None:
+        selecionado = self.tree.focus()
+        if not selecionado:
+            msg.showwarning("ATENCAO", "NENHUM CLIENTE SELECIONADO.")
+            return None
+        valores = self.tree.item(selecionado, "values")
+        id_cliente = int(valores[0])
+        print(f"ID CLIENTE SELECIONADO: {id_cliente}")
+        cliente = self.jsonCliente.buscar_cliente_id(id_cliente=id_cliente)
+        pesquisa = cliente.gerar_pesquisa()
+        anuncios = self.extrator.extrair_anuncios(pesquisa=pesquisa)
+        a = []
+        for anuncio in anuncios:
+            if anuncio.cidade.upper() == cliente.cidade_desejada.upper():
+                self.jsonPendencia.adicionar_anuncio_pendente(anuncio=anuncios, id_cliente=id_cliente)
+                a.append(anuncio)
+        
+        msg.showinfo("INFO", f"Foram encontrados {len(a)} novos anuncios para o cliente {valores[1]}.")
+    
+        self.carregar_clientes_pendentes()
 

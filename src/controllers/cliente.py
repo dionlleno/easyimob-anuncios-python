@@ -1,12 +1,14 @@
 import json
 import os
 from controllers.logs import LogGerador
+from controllers.pendencia import PendenciaJson
 from models.cliente import Cliente
 
 class ClienteJson:
   def __init__(self):
     self.path_clientes = os.path.join("data", "clientes.json")
     self.log = LogGerador()
+    self.jsonPendencia = PendenciaJson()
 
   def carregar_json(self, path) -> dict:
     if not os.path.exists(path):
@@ -165,11 +167,20 @@ class ClienteJson:
 
   def marcar_pendente(self, id_cliente: int, pendente: bool) -> None:
     clientes = self.listar_clientes()
-    for cliente in clientes:
-      if cliente.id_cliente == id_cliente:
-        cliente.pendente = pendente
-        self.atualizar_cliente(cliente=cliente)
-        break
+    if pendente:
+      for cliente in clientes:
+        if cliente.id_cliente == id_cliente:
+          cliente.pendente = pendente
+          self.atualizar_cliente(cliente=cliente)
+          break
+      self.jsonPendencia.adicionar_cliente_pendente(id_cliente=id_cliente)
+    else:
+      for cliente in clientes:
+        if cliente.id_cliente == id_cliente:
+          cliente.pendente = pendente
+          self.atualizar_cliente(cliente=cliente)
+          break
+      self.jsonPendencia.remover_cliente_pendente(id_cliente=id_cliente)
 
   def listar_clientes_pendentes(self) -> list[Cliente]:
     clientes = self.listar_clientes()
