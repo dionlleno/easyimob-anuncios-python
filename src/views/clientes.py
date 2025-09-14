@@ -250,7 +250,7 @@ class ClientesView(ttk.Frame):
         pesquisa = Pesquisa(
             tipo_busca = self.cliente.tipo_aquisicao.lower(),
             quant_paginas=5,
-            uf=self.cliente.uf_desejado,
+            uf=self.cliente.uf_desejado.lower() if self.cliente.uf_desejado.lower() != "todos" else None,
             orcamento_max=self.cliente.orcamento,
             quant_vagas=self.cliente.quant_vagas,
             quant_banheiros=self.cliente.quant_banheiros,
