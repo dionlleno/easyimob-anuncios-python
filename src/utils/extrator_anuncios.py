@@ -19,8 +19,8 @@ class ExtratorAnuncios:
       return json.load(arquivo)
 
   def gerar_urls(self, pesquisa: Pesquisa) -> list[str]:
-    if pesquisa.uf == "Todos": link_uf = ""
-    else:                      link_uf = f"estado-{pesquisa.uf.lower()}"
+    if pesquisa.uf == "TODOS" : link_uf = ""
+    else:                       link_uf = f"estado-{pesquisa.uf}"
 
     if pesquisa.orcamento_max == None:
       link_orcamento = ""
