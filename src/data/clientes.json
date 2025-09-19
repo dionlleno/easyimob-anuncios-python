@@ -5,11 +5,11 @@
     "email": "TEESTE",
     "telefone": "1212121212",
     "tipo_imovel": "CASA",
-    "tipo_aquisicao": "ALUGUEL",
-    "cidade_desejado": "Recanto das Emas",
+    "tipo_aquisicao": "VENDA",
+    "cidade_desejado": "",
     "uf_desejado": "DF",
     "orcamento": 1200.0,
-    "pendente": false,
+    "pendente": true,
     "quant_vagas": 1,
     "quant_banheiros": 1,
     "quant_quartos": 1
@@ -24,9 +24,6 @@
     "cidade_desejado": "Jardim Londres",
     "uf_desejado": "SP",
     "orcamento": 5000.0,
-    "pendente": true,
-    "quant_vagas": 2,
-    "quant_banheiros": 2,
-    "quant_quartos": 2
+    "pendente": true
   }
 ]

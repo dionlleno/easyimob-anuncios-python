@@ -85,18 +85,19 @@ class PendenciaJson:
         dados_filtrados.append(dado)
     self.salvar_json(path=self.path_anuncios, dados=dados_filtrados)
 
-  def adicionar_anuncio_pendente(self, id_cliente: int, anuncio: list[Anuncio]) -> None:
+  def adicionar_anuncio_pendente(self, id_cliente: int, anuncios: list[Anuncio]) -> None:
     dados = self.carregar_json(self.path_anuncios)
     for dado in dados:
       print(f"ID: {dado.get('id_cliente')}")
       if id_cliente == dado.get("id_cliente"):
-        anuncios = dado.get("anuncios_encontrados", [])
-        for a in anuncios:
-          print(a)
-          if a.get("id_anuncio") == anuncio.id_anuncio:
-            print("Anuncio ja existe na lista de pendentes.")
-            continue
-          anuncios.append({
+        novos_anuncios = dado.get("anuncios_encontrados", [])
+        
+        for anuncio in novos_anuncios:
+          print(anuncio)
+          #if a.get("id_anuncio") == anuncio.id_anuncio:
+            #rint("Anuncio ja existe na lista de pendentes.")
+            # continue
+          novos_anuncios.append({
             "id_anuncio": anuncio.id_anuncio,
             "titulo": anuncio.titulo,
             "link_anuncio": anuncio.link_anuncio,
@@ -117,6 +118,8 @@ class PendenciaJson:
             "detalhes_imovel": anuncio.detalhes_imovel,
             "detalhes_condominio": anuncio.detalhes_condominio,
           })
+        dado["anuncios_encontrados"] = novos_anuncios
+        break
     self.salvar_json(path=self.path_anuncios, dados=dados)
 
   def remover_anuncios_pendentes(self, id_cliente: int) -> None:

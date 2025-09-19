@@ -144,6 +144,7 @@ class PendentesView(ttk.Frame):
         print(f"ID CLIENTE SELECIONADO: {id_cliente}")
         cliente = self.jsonCliente.buscar_cliente_id(id_cliente=id_cliente)
         pesquisa = cliente.gerar_pesquisa()
+        pesquisa.quant_paginas = 5  # limitar a 5 paginas por busca
         anuncios = self.extrator.extrair_anuncios(pesquisa=pesquisa)
         a = []
         for anuncio in anuncios:

@@ -58,6 +58,6 @@ if __name__ == "__main__":
                 continue
             anu.append(anuncio)
         msg.showinfo("Novos Anúncios Encontrados", f"Foram encontrados {len(anu)} novos anúncios para o cliente {cliente.nome} - {cliente.id_cliente}.")
-        jsonPendencia.adicionar_anuncio_pendente(id_cliente=cliente.id_cliente, anuncio=anu)
+        jsonPendencia.adicionar_anuncio_pendente(id_cliente=int(cliente.id_cliente), anuncios=anu)
     app = App()
     app.mainloop()
