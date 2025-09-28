@@ -164,6 +164,9 @@ class ClienteJson:
         pendente=dado.get("pendente")
       )
       self.adicionar_cliente(cliente=cliente)
+      if cliente.pendente is False:
+        continue
+      self.marcar_pendente(id_cliente=cliente.id_cliente, pendente=True)
 
   def marcar_pendente(self, id_cliente: int, pendente: bool) -> None:
     clientes = self.listar_clientes()

@@ -7,3 +7,9 @@ class Pesquisa:
     self.quant_vagas = quant_vagas
     self.quant_quartos = quant_quartos
     self.quant_banheiros = quant_banheiros
+  
+def __str__(self) -> str:
+    return f"Pesquisa(tipo_busca={self.tipo_busca}, quant_paginas={self.quant_paginas}, uf={self.uf}, orcamento_max={self.orcamento_max}, quant_vagas={self.quant_vagas}, quant_quartos={self.quant_quartos}, quant_banheiros={self.quant_banheiros})"  
+
+def __repr__(self) -> str:
+    return self.__str__()

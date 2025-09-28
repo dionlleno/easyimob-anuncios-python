@@ -17,11 +17,11 @@ class Cliente:
     self.orcamento = orcamento
     self.pendente = pendente
   
-  def gerar_pesquisa(self):
+  def gerar_pesquisa(self) -> Pesquisa:
     return Pesquisa(
       tipo_busca = self.tipo_aquisicao.lower(),
       quant_paginas=1,
-      uf=self.uf_desejado,
+      uf=self.uf_desejado.lower(),
       orcamento_max=self.orcamento,
       quant_vagas=self.quant_vagas,
       quant_banheiros=self.quant_banheiros,

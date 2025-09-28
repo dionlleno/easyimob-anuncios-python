@@ -91,12 +91,11 @@ class PendenciaJson:
       print(f"ID: {dado.get('id_cliente')}")
       if id_cliente == dado.get("id_cliente"):
         novos_anuncios = dado.get("anuncios_encontrados", [])
-        
-        for anuncio in novos_anuncios:
+        for anuncio in anuncios:
           print(anuncio)
-          #if a.get("id_anuncio") == anuncio.id_anuncio:
-            #rint("Anuncio ja existe na lista de pendentes.")
-            # continue
+          if any(a.get("titulo") == anuncio.titulo for a in novos_anuncios):
+            print("Anuncio ja existe na lista de pendentes.")
+            continue
           novos_anuncios.append({
             "id_anuncio": anuncio.id_anuncio,
             "titulo": anuncio.titulo,

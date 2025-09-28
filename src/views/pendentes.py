@@ -6,6 +6,7 @@ from ttkbootstrap.constants import *
 
 from controllers.cliente import ClienteJson
 from controllers.pendencia import PendenciaJson
+from models.pesquisa import Pesquisa
 from utils.extrator_anuncios import ExtratorAnuncios
 
 class PendentesView(ttk.Frame):
@@ -72,7 +73,6 @@ class PendentesView(ttk.Frame):
         selecionado = self.tree.focus()
         if selecionado:
             valores = self.tree.item(selecionado, "values")
-            print(valores)
             self.jsonCliente.marcar_pendente(id_cliente=int(valores[0]), pendente=False)
             self.carregar_clientes_pendentes()
         else:
@@ -85,7 +85,6 @@ class PendentesView(ttk.Frame):
             return None
         valores = self.tree.item(selecionado, "values")
         id_cliente = int(valores[0])
-        print(f"ID CLIENTE SELECIONADO: {id_cliente}")
 
         pop_up = tk.Toplevel(self)
         pop_up.title("Adicionar Cliente")
@@ -111,7 +110,6 @@ class PendentesView(ttk.Frame):
         self.limpar_listagem(anuncios_tree)
 
         anuncios = self.jsonPendencia.listar_anuncios_pendentes(id_cliente=id_cliente)
-        print(f"ANUNCIOS ENCONTRADOS: {len(anuncios)}")
         for anuncio in anuncios:
             anuncios_tree.insert("", "end", values=(
                 anuncio.id_anuncio,
@@ -128,7 +126,6 @@ class PendentesView(ttk.Frame):
                 return None
             valores = anuncios_tree.item(selecionado, "values")
             link = valores[5]
-            print(f"LINK DO ANUNCIO: {link}")
             import webbrowser
             webbrowser.open(link)
 
@@ -141,18 +138,19 @@ class PendentesView(ttk.Frame):
             return None
         valores = self.tree.item(selecionado, "values")
         id_cliente = int(valores[0])
-        print(f"ID CLIENTE SELECIONADO: {id_cliente}")
         cliente = self.jsonCliente.buscar_cliente_id(id_cliente=id_cliente)
-        pesquisa = cliente.gerar_pesquisa()
-        pesquisa.quant_paginas = 5  # limitar a 5 paginas por busca
+        msg.showinfo("INFO", f"Iniciando busca de novos anuncios para o cliente {cliente.id_cliente} - {cliente.nome}...")
+        pesquisa: Pesquisa = cliente.gerar_pesquisa()
+        pesquisa.quant_paginas = 5
         anuncios = self.extrator.extrair_anuncios(pesquisa=pesquisa)
         a = []
         for anuncio in anuncios:
             if anuncio.cidade.upper() == cliente.cidade_desejada.upper():
-                self.jsonPendencia.adicionar_anuncio_pendente(anuncio=anuncios, id_cliente=id_cliente)
                 a.append(anuncio)
-        
-        msg.showinfo("INFO", f"Foram encontrados {len(a)} novos anuncios para o cliente {valores[1]}.")
-    
+        msg.showinfo("INFO", f"Foram encontrados {len(a)} novos anuncios para o cliente {cliente.id_cliente} - {cliente.nome}.")
+        if len(a) == 0:
+            msg.showinfo("INFO", f"Nenhum novo anuncio encontrado para o cliente {cliente.id_cliente} - {cliente.nome}.")
+            return None
+        self.jsonPendencia.adicionar_anuncio_pendente(id_cliente=cliente.id_cliente, anuncios=a)
         self.carregar_clientes_pendentes()
 

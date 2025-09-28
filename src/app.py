@@ -10,6 +10,7 @@ from views.anuncios import AnunciosView
 from views.pendentes import PendentesView
 from views.ajustes import AjustesView
 from tkinter import messagebox as msg
+import sys
 
 
 class App(tb.Window):
@@ -25,39 +26,40 @@ class App(tb.Window):
         # Abas
         clientes_tab = ClientesView(notebook)
         anuncios_tab = AnunciosView(notebook)
-        pendentes_tab = PendentesView(notebook)  # ✅ Nova aba
+        pendentes_tab = PendentesView(notebook)
         ajustes_tab = AjustesView(notebook)
 
         notebook.add(clientes_tab, text="CLIENTES")
         notebook.add(anuncios_tab, text="ANUNCIOS")
-        notebook.add(pendentes_tab, text="PENDENTES")  # ✅ Adicionada
+        notebook.add(pendentes_tab, text="PENDENTES")
         notebook.add(ajustes_tab, text="AJUSTES")
 
 if __name__ == "__main__":
-    jsonCliente = ClienteJson()
-    jsonPendencia = ClienteJson()
-    extrator = ExtratorAnuncios()
-    jsonPendencia = PendenciaJson()
-    clientes_pendentes = jsonCliente.listar_clientes_pendentes()
-    for cliente in clientes_pendentes:
-        print(f"Cliente Pendente: {cliente.nome} - {cliente.email}")
-        pesquisa = Pesquisa(
-            tipo_busca = cliente.tipo_aquisicao.lower(),
-            quant_paginas=1,
-            uf=cliente.uf_desejado,
-            orcamento_max=cliente.orcamento,
-            quant_vagas=cliente.quant_vagas,
-            quant_banheiros=cliente.quant_banheiros,
-            quant_quartos=cliente.quant_quartos
-        )
-        anuncios = extrator.extrair_anuncios(pesquisa=pesquisa)
-        #jsonCliente.marcar_pendente(id_cliente=cliente.id_cliente, pendente=False)
-        anu = []
-        for anuncio in anuncios:
-            if anuncio.cidade.upper() != cliente.cidade_desejada.upper():
-                continue
-            anu.append(anuncio)
-        msg.showinfo("Novos Anúncios Encontrados", f"Foram encontrados {len(anu)} novos anúncios para o cliente {cliente.nome} - {cliente.id_cliente}.")
-        jsonPendencia.adicionar_anuncio_pendente(id_cliente=int(cliente.id_cliente), anuncios=anu)
-    app = App()
-    app.mainloop()
+    if len(sys.argv) > 1 and sys.argv[1] == "pendente":
+        jsonCliente = ClienteJson()
+        jsonPendencia = ClienteJson()
+        extrator = ExtratorAnuncios()
+        jsonPendencia = PendenciaJson()
+        clientes_pendentes = jsonCliente.listar_clientes_pendentes()
+        for cliente in clientes_pendentes:
+            print(f"Cliente Pendente: {cliente.nome} - {cliente.email}")
+            pesquisa = Pesquisa(
+                tipo_busca = cliente.tipo_aquisicao.lower(),
+                quant_paginas=5,
+                uf=cliente.uf_desejado,
+                orcamento_max=cliente.orcamento,
+                quant_vagas=cliente.quant_vagas,
+                quant_banheiros=cliente.quant_banheiros,
+                quant_quartos=cliente.quant_quartos
+            )
+            anuncios = extrator.extrair_anuncios(pesquisa=pesquisa)
+            anu = []
+            for anuncio in anuncios:
+                if anuncio.cidade == cliente.cidade_desejada:
+                    anu.append(anuncio)
+            msg.showinfo("Novos Anúncios Encontrados", f"Foram encontrados {len(anu)} novos anúncios para o cliente {cliente.nome} - {cliente.id_cliente}.")
+            if len(anu) > 0:
+                jsonPendencia.adicionar_anuncio_pendente(id_cliente=int(cliente.id_cliente), anuncios=anu)
+    else:
+        app = App()
+        app.mainloop()

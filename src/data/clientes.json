@@ -2,28 +2,16 @@
   {
     "id_cliente": 1,
     "nome": "TESTE",
-    "email": "TEESTE",
-    "telefone": "1212121212",
+    "email": "TESTE",
+    "telefone": "TESTE",
     "tipo_imovel": "CASA",
     "tipo_aquisicao": "VENDA",
-    "cidade_desejado": "",
+    "cidade_desejado": "Asa Sul",
     "uf_desejado": "DF",
-    "orcamento": 1200.0,
+    "orcamento": 10000.0,
     "pendente": true,
     "quant_vagas": 1,
     "quant_banheiros": 1,
     "quant_quartos": 1
-  },
-  {
-    "id_cliente": 2,
-    "nome": "DIONLLLENO",
-    "email": "TESTE@TESTE",
-    "telefone": "121212121212",
-    "tipo_imovel": "CASA",
-    "tipo_aquisicao": "ALUGUEL",
-    "cidade_desejado": "Jardim Londres",
-    "uf_desejado": "SP",
-    "orcamento": 5000.0,
-    "pendente": true
   }
 ]
