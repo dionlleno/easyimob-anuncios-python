@@ -28,7 +28,6 @@ class PendenciaJson:
       with open(path, "w", encoding="utf-8") as arquivo:
         json.dump(dados, arquivo, ensure_ascii=False, indent=2)
     except Exception as erro:
-      print(dados)
       print(f"Erro ao salvar o arquivo -> {path}")
       print(f"Erro: {erro}") 
   
@@ -36,10 +35,8 @@ class PendenciaJson:
     dados = self.carregar_json(self.path_anuncios)
     anuncios: list[Anuncio] = []
     for dado in dados:
-      print(dado)
       if dado.get("id_cliente") == id_cliente:
         a = dado.get("anuncios_encontrados", {})
-        print(a)
         for anuncio in a:
           anuncios.append(Anuncio(
             id_anuncio=int(anuncio.get("id_anuncio")),
@@ -69,7 +66,6 @@ class PendenciaJson:
     dados = self.carregar_json(self.path_anuncios)
     for dado in dados:
       if dado.get("id_cliente") == id_cliente:
-        print("Cliente ja existe na lista de pendentes.")
         return
     dados.append({
       "id_cliente": id_cliente,
@@ -88,11 +84,9 @@ class PendenciaJson:
   def adicionar_anuncio_pendente(self, id_cliente: int, anuncios: list[Anuncio]) -> None:
     dados = self.carregar_json(self.path_anuncios)
     for dado in dados:
-      print(f"ID: {dado.get('id_cliente')}")
       if id_cliente == dado.get("id_cliente"):
         novos_anuncios = dado.get("anuncios_encontrados", [])
         for anuncio in anuncios:
-          print(anuncio)
           if any(a.get("titulo") == anuncio.titulo for a in novos_anuncios):
             print("Anuncio ja existe na lista de pendentes.")
             continue
@@ -134,7 +128,6 @@ if __name__ == "__main__":
   jsonPendencia = PendenciaJson()
   anuncios = jsonPendencia.listar_anuncios_pendentes(id_cliente=1)
   for anuncio in anuncios:
-    print(anuncio)
   pendencia = PendenciaJson()
   pendencia.remover_anuncios_pendentes(id_cliente=1)
   """
@@ -152,4 +145,3 @@ if __name__ == "__main__":
   anuncios = extrator.extrair_anuncios(pesquisa=pesquisa)
   for anuncio in anuncios:
     anuncio_json.adicionar_anuncio_pendente(id_cliente=1, anuncio=anuncio)
-    print(anuncio)

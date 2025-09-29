@@ -73,7 +73,6 @@ class ClienteJson:
 
   def adicionar_cliente(self, cliente: Cliente) -> None:
     dados = self.carregar_json(self.path_clientes)
-    #if not self.cliente_existe(cliente=cliente, dados=dados):
     dados.append(
       {
         "id_cliente": self.gerar_id(dados=dados),

@@ -6,7 +6,7 @@
     "telefone": "TESTE",
     "tipo_imovel": "CASA",
     "tipo_aquisicao": "VENDA",
-    "cidade_desejado": "Asa Sul",
+    "cidade_desejado": "",
     "uf_desejado": "DF",
     "orcamento": 10000.0,
     "pendente": true,
